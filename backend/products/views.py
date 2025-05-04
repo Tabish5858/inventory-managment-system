@@ -23,7 +23,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         filters.SearchFilter,
         filters.OrderingFilter,
     ]
-    filterset_fields = ["category", "is_low_stock"]
+    filterset_fields = ["category"]
     search_fields = ["name", "description", "sku", "barcode"]
     ordering_fields = ["name", "price", "quantity", "created_at"]
 

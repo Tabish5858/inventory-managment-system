@@ -102,7 +102,7 @@ export default function ProductsPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">{product.sku}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{product.category_name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">${product.price.toFixed(2)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">${typeof product.price === 'number' ? product.price.toFixed(2) : Number(product.price).toFixed(2)}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{product.quantity}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {product.is_low_stock ? (

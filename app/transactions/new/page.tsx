@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
@@ -64,7 +65,7 @@ export default function NewTransactionPage() {
     if (name === 'quantity') {
       setTransaction({
         ...transaction,
-        [name]: parseInt(value)
+        [name]: parseInt(value) || 1
       });
     } else if (name === 'product') {
       setTransaction({
@@ -96,26 +97,37 @@ export default function NewTransactionPage() {
   };
 
   if (isProductsLoading) {
-    return <div className="flex items-center justify-center min-h-screen"><div className="text-xl">Loading products...</div></div>;
+    return <div className="flex items-center justify-center min-h-screen"><div className="text-xl text-white">Loading products...</div></div>;
   }
 
   // Find the selected product
   const selectedProduct = products.find(p => p.id === transaction.product);
 
+  // Safely format price to prevent TypeError
+  const formatPrice = (price: any): string => {
+    if (typeof price === 'number') {
+      return price.toFixed(2);
+    } else if (typeof price === 'string') {
+      const numPrice = parseFloat(price);
+      return isNaN(numPrice) ? '0.00' : numPrice.toFixed(2);
+    }
+    return '0.00';
+  };
+
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Record Transaction</h1>
+      <h1 className="text-3xl font-bold mb-6 text-white">Record Transaction</h1>
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="bg-red-900 border border-red-700 text-red-100 px-4 py-3 rounded mb-4">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
+      <form onSubmit={handleSubmit} className="bg-gray-800 rounded-lg shadow-md p-6 border border-gray-700">
         <div className="grid grid-cols-1 gap-6">
           <div>
-            <label htmlFor="transaction_type" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="transaction_type" className="block text-sm font-medium text-gray-300 mb-1">
               Transaction Type*
             </label>
             <select
@@ -124,7 +136,7 @@ export default function NewTransactionPage() {
               name="transaction_type"
               value={transaction.transaction_type}
               onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-white"
             >
               <option value="sale">Sale</option>
               <option value="purchase">Purchase</option>
@@ -134,7 +146,7 @@ export default function NewTransactionPage() {
           </div>
 
           <div>
-            <label htmlFor="product" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="product" className="block text-sm font-medium text-gray-300 mb-1">
               Product*
             </label>
             <select
@@ -143,7 +155,7 @@ export default function NewTransactionPage() {
               name="product"
               value={transaction.product}
               onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-white"
             >
               {products.length === 0 && <option value="">No products available</option>}
               {products.map((product) => (
@@ -155,16 +167,16 @@ export default function NewTransactionPage() {
           </div>
 
           {selectedProduct && (
-            <div className="bg-gray-50 p-4 rounded-md">
-              <h3 className="font-semibold mb-2">Product Details</h3>
-              <p><span className="text-gray-600">SKU:</span> {selectedProduct.sku}</p>
-              <p><span className="text-gray-600">Current Stock:</span> {selectedProduct.quantity}</p>
-              <p><span className="text-gray-600">Price:</span> ${selectedProduct.price.toFixed(2)}</p>
+            <div className="bg-gray-700 p-4 rounded-md border border-gray-600">
+              <h3 className="font-semibold mb-2 text-white">Product Details</h3>
+              <p className="text-gray-300"><span className="text-gray-400">SKU:</span> {selectedProduct.sku}</p>
+              <p className="text-gray-300"><span className="text-gray-400">Current Stock:</span> {selectedProduct.quantity}</p>
+              <p className="text-gray-300"><span className="text-gray-400">Price:</span> ${formatPrice(selectedProduct.price)}</p>
             </div>
           )}
 
           <div>
-            <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="quantity" className="block text-sm font-medium text-gray-300 mb-1">
               Quantity*
             </label>
             <input
@@ -175,16 +187,16 @@ export default function NewTransactionPage() {
               name="quantity"
               value={transaction.quantity}
               onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-white"
             />
 
             {transaction.transaction_type === 'sale' && selectedProduct && (transaction.quantity ?? 0) > selectedProduct.quantity && (
-              <p className="text-red-500 text-sm mt-1">Warning: Quantity exceeds current stock ({selectedProduct.quantity}).</p>
+              <p className="text-red-400 text-sm mt-1">Warning: Quantity exceeds current stock ({selectedProduct.quantity}).</p>
             )}
           </div>
 
           <div>
-            <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="notes" className="block text-sm font-medium text-gray-300 mb-1">
               Notes
             </label>
             <textarea
@@ -194,7 +206,7 @@ export default function NewTransactionPage() {
               value={transaction.notes}
               onChange={handleChange}
               placeholder="Add any additional information about this transaction"
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-white"
             />
           </div>
         </div>
@@ -202,14 +214,14 @@ export default function NewTransactionPage() {
         <div className="mt-6 flex justify-between">
           <Link
             href="/transactions"
-            className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md"
+            className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md"
           >
             Cancel
           </Link>
           <button
             type="submit"
             disabled={isLoading}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md disabled:bg-blue-300"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md disabled:bg-blue-800 disabled:opacity-50"
           >
             {isLoading ? 'Saving...' : 'Record Transaction'}
           </button>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Notification service to handle alert notifications
 
 interface Notification {

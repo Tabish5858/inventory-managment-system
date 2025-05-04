@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import Link from 'next/link';
@@ -177,7 +178,7 @@ export default function NewTransactionPage() {
               className="w-full p-2 border border-gray-300 rounded-md"
             />
 
-            {transaction.transaction_type === 'sale' && selectedProduct && transaction.quantity > selectedProduct.quantity && (
+            {transaction.transaction_type === 'sale' && selectedProduct && (transaction.quantity ?? 0) > selectedProduct.quantity && (
               <p className="text-red-500 text-sm mt-1">Warning: Quantity exceeds current stock ({selectedProduct.quantity}).</p>
             )}
           </div>

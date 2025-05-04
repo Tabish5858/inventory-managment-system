@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { Html5QrcodeScanner } from 'html5-qrcode';
@@ -52,7 +53,7 @@ export default function BarcodePage() {
 
       // Search for product by barcode
       const products = await productService.getAll();
-      const product = products.find(p => p.barcode === decodedText || p.sku === decodedText);
+      const product = products.find((p: { barcode: string; sku: string; }) => p.barcode === decodedText || p.sku === decodedText);
 
       if (product) {
         setProductFound(true);

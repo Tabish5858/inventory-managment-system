@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import NotificationsMenu from './NotificationsMenu';
-import ThemeToggle from './ThemeToggle';
 
 export default function Header() {
   const pathname = usePathname();
@@ -43,9 +42,8 @@ export default function Header() {
               ))}
             </nav>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center">
               <NotificationsMenu />
-              <ThemeToggle />
             </div>
           </div>
         </div>

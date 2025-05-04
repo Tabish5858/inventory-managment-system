@@ -17,11 +17,11 @@ export default function NewProductPage() {
     description: '',
     sku: '',
     barcode: '',
-    category: 0,
-    price: 0,
-    cost_price: 0,
-    quantity: 0,
-    low_stock_threshold: 10,
+    category: undefined, // Changed from 0 to undefined
+    price: '',           // Changed from 0 to empty string to fix parsing issues
+    cost_price: '',      // Changed from 0 to empty string
+    quantity: '',        // Changed from 0 to empty string
+    low_stock_threshold: '10', // Changed from 10 to '10' string
   });
 
   useEffect(() => {
@@ -43,13 +43,9 @@ export default function NewProductPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    const parsedValue = name === 'price' || name === 'cost_price' || name === 'quantity' || name === 'low_stock_threshold'
-      ? parseFloat(value)
-      : value;
-
     setProduct({
       ...product,
-      [name]: parsedValue
+      [name]: name === 'category' ? parseInt(value) : value
     });
   };
 
@@ -59,7 +55,16 @@ export default function NewProductPage() {
     setError('');
 
     try {
-      await productService.create(product as Product);
+      // Convert numeric strings to numbers before submitting
+      const productToSubmit = {
+        ...product,
+        price: parseFloat(product.price as string) || 0,
+        cost_price: parseFloat(product.cost_price as string) || 0,
+        quantity: parseInt(product.quantity as string) || 0,
+        low_stock_threshold: parseInt(product.low_stock_threshold as string) || 10
+      };
+
+      await productService.create(productToSubmit as Product);
       router.push('/products');
     } catch (err) {
       console.error('Failed to create product', err);
@@ -71,18 +76,18 @@ export default function NewProductPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Add New Product</h1>
+      <h1 className="text-3xl font-bold mb-6 text-white">Add New Product</h1>
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="bg-red-900 border border-red-700 text-red-100 px-4 py-3 rounded mb-4">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
+      <form onSubmit={handleSubmit} className="bg-gray-800 rounded-lg shadow-md p-6 border border-gray-700">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">
               Product Name*
             </label>
             <input
@@ -92,12 +97,12 @@ export default function NewProductPage() {
               name="name"
               value={product.name}
               onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 bg-gray-700 border border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 text-white"
             />
           </div>
 
           <div>
-            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="category" className="block text-sm font-medium text-gray-300 mb-1">
               Category*
             </label>
             <select
@@ -106,7 +111,7 @@ export default function NewProductPage() {
               name="category"
               value={product.category}
               onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 bg-gray-700 border border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 text-white"
             >
               {categories.length === 0 && <option value="">No categories available</option>}
               {categories.map((category) => (
@@ -118,7 +123,7 @@ export default function NewProductPage() {
           </div>
 
           <div>
-            <label htmlFor="sku" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="sku" className="block text-sm font-medium text-gray-300 mb-1">
               SKU* (Stock Keeping Unit)
             </label>
             <input
@@ -128,12 +133,12 @@ export default function NewProductPage() {
               name="sku"
               value={product.sku}
               onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 bg-gray-700 border border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 text-white"
             />
           </div>
 
           <div>
-            <label htmlFor="barcode" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="barcode" className="block text-sm font-medium text-gray-300 mb-1">
               Barcode
             </label>
             <input
@@ -142,12 +147,12 @@ export default function NewProductPage() {
               name="barcode"
               value={product.barcode}
               onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 bg-gray-700 border border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 text-white"
             />
           </div>
 
           <div>
-            <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="price" className="block text-sm font-medium text-gray-300 mb-1">
               Selling Price*
             </label>
             <input
@@ -159,12 +164,12 @@ export default function NewProductPage() {
               name="price"
               value={product.price}
               onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 bg-gray-700 border border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 text-white"
             />
           </div>
 
           <div>
-            <label htmlFor="cost_price" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="cost_price" className="block text-sm font-medium text-gray-300 mb-1">
               Cost Price*
             </label>
             <input
@@ -176,12 +181,12 @@ export default function NewProductPage() {
               name="cost_price"
               value={product.cost_price}
               onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 bg-gray-700 border border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 text-white"
             />
           </div>
 
           <div>
-            <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="quantity" className="block text-sm font-medium text-gray-300 mb-1">
               Initial Quantity*
             </label>
             <input
@@ -192,12 +197,12 @@ export default function NewProductPage() {
               name="quantity"
               value={product.quantity}
               onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 bg-gray-700 border border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 text-white"
             />
           </div>
 
           <div>
-            <label htmlFor="low_stock_threshold" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="low_stock_threshold" className="block text-sm font-medium text-gray-300 mb-1">
               Low Stock Alert Threshold*
             </label>
             <input
@@ -208,12 +213,12 @@ export default function NewProductPage() {
               name="low_stock_threshold"
               value={product.low_stock_threshold}
               onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 bg-gray-700 border border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 text-white"
             />
           </div>
 
           <div className="md:col-span-2">
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-1">
               Description
             </label>
             <textarea
@@ -222,7 +227,7 @@ export default function NewProductPage() {
               rows={4}
               value={product.description}
               onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 bg-gray-700 border border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 text-white"
             />
           </div>
         </div>
@@ -230,14 +235,14 @@ export default function NewProductPage() {
         <div className="mt-6 flex justify-between">
           <Link
             href="/products"
-            className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md"
+            className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md"
           >
             Cancel
           </Link>
           <button
             type="submit"
             disabled={isLoading}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md disabled:bg-blue-300"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md disabled:bg-blue-800 disabled:opacity-50"
           >
             {isLoading ? 'Saving...' : 'Save Product'}
           </button>

@@ -83,50 +83,50 @@ export default function CategoriesPage() {
   };
 
   if (isLoading) {
-    return <div className="flex items-center justify-center min-h-screen"><div className="text-xl">Loading categories...</div></div>;
+    return <div className="flex items-center justify-center min-h-screen"><div className="text-xl text-white">Loading categories...</div></div>;
   }
 
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Categories</h1>
+        <h1 className="text-3xl font-bold text-white">Categories</h1>
         <button
           onClick={() => handleOpenModal()}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
         >
           Add New Category
         </button>
       </div>
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="bg-red-900 border border-red-700 text-red-100 px-4 py-3 rounded mb-4">
           {error}
         </div>
       )}
 
       {categories.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <p className="text-gray-500">No categories found. Add your first category to start organizing your inventory.</p>
+        <div className="bg-gray-800 rounded-lg shadow-md p-6 text-center border border-gray-700">
+          <p className="text-gray-400">No categories found. Add your first category to start organizing your inventory.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {categories.map((category) => (
-            <div key={category.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div key={category.id} className="bg-gray-800 rounded-lg shadow-md overflow-hidden border border-gray-700">
               <div className="p-6">
-                <h3 className="text-lg font-semibold mb-2">{category.name}</h3>
-                <p className="text-gray-600 mb-4">
+                <h3 className="text-lg font-semibold mb-2 text-white">{category.name}</h3>
+                <p className="text-gray-300 mb-4">
                   {category.description || 'No description provided'}
                 </p>
                 <div className="flex justify-end space-x-2">
                   <button
                     onClick={() => handleOpenModal(category)}
-                    className="text-blue-600 hover:text-blue-800"
+                    className="text-blue-400 hover:text-blue-300"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => handleDelete(category.id!)}
-                    className="text-red-600 hover:text-red-800"
+                    className="text-red-400 hover:text-red-300"
                   >
                     Delete
                   </button>
@@ -140,7 +140,7 @@ export default function CategoriesPage() {
       <div className="mt-6">
         <Link
           href="/"
-          className="text-blue-600 hover:text-blue-900"
+          className="text-blue-400 hover:text-blue-300"
         >
           ← Back to Dashboard
         </Link>
@@ -149,15 +149,15 @@ export default function CategoriesPage() {
       {/* Modal for Add/Edit Category */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
+          <div className="bg-gray-800 rounded-lg shadow-lg w-full max-w-md border border-gray-700">
             <div className="p-6">
-              <h2 className="text-xl font-semibold mb-4">
+              <h2 className="text-xl font-semibold mb-4 text-white">
                 {isEditing ? 'Edit Category' : 'Add New Category'}
               </h2>
 
               <form onSubmit={handleSubmit}>
                 <div className="mb-4">
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">
                     Category Name*
                   </label>
                   <input
@@ -167,12 +167,12 @@ export default function CategoriesPage() {
                     name="name"
                     value={currentCategory.name}
                     onChange={handleChange}
-                    className="w-full p-2 border border-gray-300 rounded-md"
+                    className="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
                   />
                 </div>
 
                 <div className="mb-4">
-                  <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-1">
                     Description
                   </label>
                   <textarea
@@ -181,7 +181,7 @@ export default function CategoriesPage() {
                     rows={3}
                     value={currentCategory.description}
                     onChange={handleChange}
-                    className="w-full p-2 border border-gray-300 rounded-md"
+                    className="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
                   />
                 </div>
 
@@ -189,13 +189,13 @@ export default function CategoriesPage() {
                   <button
                     type="button"
                     onClick={handleCloseModal}
-                    className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md"
+                    className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
                   >
                     {isEditing ? 'Update' : 'Save'}
                   </button>

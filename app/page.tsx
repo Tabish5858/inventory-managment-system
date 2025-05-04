@@ -1,103 +1,175 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { Product, productService } from './services/productService';
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+export default function Dashboard() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [lowStockProducts, setLowStockProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [productsData, lowStockData] = await Promise.all([
+          productService.getAll(),
+          productService.getLowStock()
+        ]);
+        setProducts(productsData);
+        setLowStockProducts(lowStockData);
+      } catch (err) {
+        setError('Failed to fetch data. Please check if the Django server is running.');
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (isLoading) return <div className="flex items-center justify-center min-h-screen"><div className="text-xl">Loading...</div></div>;
+
+  if (error) return (
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        {error}
+      </div>
+      <div className="text-center">
+        <p className="mb-4">Make sure your Django backend is running:</p>
+        <div className="bg-gray-100 p-4 rounded-md text-left">
+          <code>cd backend && python manage.py runserver</code>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
     </div>
+  );
+
+  const totalProducts = products.length;
+  const totalStock = products.reduce((sum, product) => sum + product.quantity, 0);
+  const totalValue = products.reduce((sum, product) => sum + (product.price * product.quantity), 0);
+
+  return (
+    <main className="min-h-screen p-6">
+      <h1 className="text-3xl font-bold mb-6">Inventory Management Dashboard</h1>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Summary Cards */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="font-semibold text-gray-500">Total Products</h3>
+          <p className="text-3xl font-bold">{totalProducts}</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="font-semibold text-gray-500">Total Items in Stock</h3>
+          <p className="text-3xl font-bold">{totalStock}</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="font-semibold text-gray-500">Inventory Value</h3>
+          <p className="text-3xl font-bold">${totalValue.toFixed(2)}</p>
+        </div>
+      </div>
+
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold">Low Stock Alerts</h2>
+          <Link
+            href="/products"
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
+          >
+            View All Products
+          </Link>
+        </div>
+
+        {lowStockProducts.length === 0 ? (
+          <div className="bg-green-100 p-4 rounded-md">
+            <p className="text-green-700">No low stock alerts. All inventory levels are good!</p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <table className="min-w-full">
+              <thead>
+                <tr className="bg-gray-50">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Stock</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Threshold</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {lowStockProducts.map((product) => (
+                  <tr key={product.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">{product.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{product.sku}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-red-600 font-semibold">{product.quantity}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">{product.low_stock_threshold}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Link
+                        href={`/transactions/new?product=${product.id}&type=purchase`}
+                        className="text-blue-600 hover:text-blue-900"
+                      >
+                        Restock
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold">Quick Actions</h2>
+          </div>
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <div className="flex flex-col space-y-4">
+              <Link
+                href="/products/new"
+                className="bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-md text-center"
+              >
+                Add New Product
+              </Link>
+              <Link
+                href="/categories"
+                className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-3 rounded-md text-center"
+              >
+                Manage Categories
+              </Link>
+              <Link
+                href="/transactions"
+                className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-3 rounded-md text-center"
+              >
+                View All Transactions
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h2 className="text-2xl font-bold mb-4">System Status</h2>
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <div className="flex items-center space-x-2 mb-4">
+              <div className="w-3 h-3 rounded-full bg-green-500"></div>
+              <span>Backend API: Connected</span>
+            </div>
+            <div className="flex items-center space-x-2 mb-4">
+              <div className="w-3 h-3 rounded-full bg-green-500"></div>
+              <span>Database: Connected</span>
+            </div>
+            <p className="text-sm text-gray-500 mt-4">
+              Last data update: {new Date().toLocaleString()}
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }

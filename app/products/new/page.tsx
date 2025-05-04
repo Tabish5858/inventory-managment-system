@@ -6,22 +6,35 @@ import React, { useEffect, useState } from 'react';
 import { Category, categoryService } from '../../services/categoryService';
 import { Product, productService } from '../../services/productService';
 
+// Define a separate interface for form state to handle string inputs
+interface ProductFormState {
+  name: string;
+  description: string;
+  sku: string;
+  barcode: string;
+  category: number | undefined;
+  price: number | string;
+  cost_price: number | string;
+  quantity: number | string;
+  low_stock_threshold: number | string;
+}
+
 export default function NewProductPage() {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const [product, setProduct] = useState<Partial<Product>>({
+  const [product, setProduct] = useState<ProductFormState>({
     name: '',
     description: '',
     sku: '',
     barcode: '',
-    category: undefined, // Changed from 0 to undefined
-    price: '',           // Changed from 0 to empty string to fix parsing issues
-    cost_price: '',      // Changed from 0 to empty string
-    quantity: '',        // Changed from 0 to empty string
-    low_stock_threshold: '10', // Changed from 10 to '10' string
+    category: undefined,
+    price: '',
+    cost_price: '',
+    quantity: '',
+    low_stock_threshold: 10,
   });
 
   useEffect(() => {
@@ -43,10 +56,18 @@ export default function NewProductPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setProduct({
-      ...product,
-      [name]: name === 'category' ? parseInt(value) : value
-    });
+
+    if (name === 'category') {
+      setProduct({
+        ...product,
+        [name]: parseInt(value)
+      });
+    } else {
+      setProduct({
+        ...product,
+        [name]: value
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -55,16 +76,22 @@ export default function NewProductPage() {
     setError('');
 
     try {
-      // Convert numeric strings to numbers before submitting
-      const productToSubmit = {
-        ...product,
-        price: parseFloat(product.price as string) || 0,
-        cost_price: parseFloat(product.cost_price as string) || 0,
-        quantity: parseInt(product.quantity as string) || 0,
-        low_stock_threshold: parseInt(product.low_stock_threshold as string) || 10
+      // Convert form state to Product type with proper numeric values
+      const productToSubmit: Product = {
+        name: product.name,
+        description: product.description,
+        sku: product.sku,
+        barcode: product.barcode,
+        category: product.category as number,
+        price: typeof product.price === 'string' ? parseFloat(product.price) || 0 : product.price,
+        cost_price: typeof product.cost_price === 'string' ? parseFloat(product.cost_price) || 0 : product.cost_price,
+        quantity: typeof product.quantity === 'string' ? parseInt(product.quantity) || 0 : product.quantity,
+        low_stock_threshold: typeof product.low_stock_threshold === 'string'
+          ? parseInt(product.low_stock_threshold) || 10
+          : product.low_stock_threshold,
       };
 
-      await productService.create(productToSubmit as Product);
+      await productService.create(productToSubmit);
       router.push('/products');
     } catch (err) {
       console.error('Failed to create product', err);

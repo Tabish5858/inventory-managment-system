@@ -1,0 +1,5 @@
+Inventory Management System for Small Businesses
+Description: Develop a simple, user-friendly inventory management system for small businesses. It could include barcode scanning, product tracking, and notifications for restocking.
+Features: Real-time stock updates, low-stock alerts, transaction tracking.
+Real-World Impact: Helps small businesses manage inventory more efficiently, reducing stockouts and overstocking, and saving time.
+
